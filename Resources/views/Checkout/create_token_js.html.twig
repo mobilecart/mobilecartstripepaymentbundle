@@ -1,0 +1,117 @@
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<script type="text/javascript" src="{{ asset('bundles/mobilecartstripepayment/js/jquery.payment.min.js') }}"></script>
+<script type="text/javascript">
+
+    // This identifies your website in the createToken call below
+    Stripe.setPublishableKey('{{ public_key }}');
+
+    var stripePostData = {};
+    var stripeToken = '';
+    var stripeCcLastFour = '';
+    var stripeCcType = '';
+    var stripeCcFingerprint = '';
+
+    checkout.paymentHandlers['{{ code }}'] = function(buttonEl) {
+
+        var code = "{{ code }}";
+        stripePostData['payment_method'] = code;
+        var stripeContainer = $('div#payment-' + code);
+
+        try {
+
+            var ccNbrEl = stripeContainer.find("input[data-stripe='number']");
+            var cvcEl = stripeContainer.find("input[data-stripe='cvc']");
+            var expMonthEl = stripeContainer.find("select[data-stripe='exp-month']");
+            var expYearEl = stripeContainer.find("select[data-stripe='exp-year']");
+
+            ccNbrEl.parent().removeClass('has-error');
+            cvcEl.parent().removeClass('has-error');
+            expMonthEl.parent().removeClass('has-error');
+            expYearEl.parent().removeClass('has-error');
+
+            var ccNbr = ccNbrEl.val();
+            var cvc = cvcEl.val();
+            var expMonth = expMonthEl.val();
+            var expYear = expYearEl.val();
+
+            if (ccNbr.length > 10) {
+                stripeCcLastFour = ccNbr.substring((ccNbr.length - 4));
+            }
+
+            var stripeRequest = {
+                number: ccNbr,
+                cvc: cvc,
+                exp_month: expMonth,
+                exp_year: expYear
+            };
+
+            var isValid = true;
+            if (ccNbr.length < 12 || !$.payment.validateCardNumber(ccNbr)) {
+                isValid = false;
+                if (!ccNbrEl.parent().hasClass('has-error')) {
+                    ccNbrEl.parent().addClass('has-error');
+                }
+                if (!ccNbrEl.parent().hasClass('form-group')) {
+                    ccNbrEl.parent().addClass('form-group');
+                }
+            } else {
+
+            }
+
+            if (!$.payment.validateCardExpiry(expMonth, expYear)) {
+                isValid = false;
+                if (!expMonthEl.parent().hasClass('has-error')) {
+                    expMonthEl.parent().addClass('has-error');
+                }
+                if (!expYearEl.parent().hasClass('has-error')) {
+                    expYearEl.parent().addClass('has-error');
+                }
+                if (!expMonthEl.parent().hasClass('form-group')) {
+                    expMonthEl.parent().addClass('form-group');
+                }
+            }
+
+            if (!$.payment.validateCardCVC(cvc)) {
+                isValid = false;
+                if (!cvcEl.parent().hasClass('has-error')) {
+                    cvcEl.parent().addClass('has-error');
+                }
+                if (!cvcEl.parent().hasClass('form-group')) {
+                    cvcEl.parent().addClass('form-group');
+                }
+            }
+
+            if (isValid) {
+                // use the token we already generated
+                if (stripeToken.length > 3) {
+                    checkout.updateSection(buttonEl, stripePostData);
+                } else {
+                    Stripe.card.createToken(stripeRequest, function(status, response) {
+                        if (typeof response.id != 'undefined') {
+                            stripeToken = response.id;
+                            stripePostData.token = stripeToken;
+                            stripePostData.cc_type = stripeCcType;
+                            stripePostData.cc_last_four = stripeCcLastFour;
+                            stripePostData.cc_fingerprint = stripeCcFingerprint;
+                            checkout.updateSection(buttonEl, stripePostData);
+                        }
+                    });
+                }
+            } else {
+
+                buttonEl.show();
+                buttonEl.siblings('.spinner').hide();
+            }
+
+        } catch(e) {
+
+            buttonEl.show();
+            buttonEl.siblings('.spinner').hide();
+        }
+
+        return {
+            callback: true
+        };
+    };
+
+</script>
