@@ -1,0 +1,16 @@
+
+<script type="text/javascript">
+
+    checkout.paymentHandlers['{{ code }}'] = function(buttonEl) {
+        var code = "{{ code }}";
+
+        var tokenEl = $('#payment-' + code).find('select[name="' + code + '[token]"]');
+        var tokenVal = tokenEl.val();
+
+        return {
+            payment_method: code,
+            token: tokenVal
+        };
+    }
+
+</script>

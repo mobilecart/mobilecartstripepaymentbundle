@@ -5,6 +5,8 @@
     // This identifies your website in the createToken call below
     Stripe.setPublishableKey('{{ public_key }}');
 
+    // @see: https://github.com/stripe/jquery.payment
+
     var stripePostData = {};
     var stripeToken = '';
     var stripeCcLastFour = '';
@@ -36,6 +38,7 @@
 
             if (ccNbr.length > 10) {
                 stripeCcLastFour = ccNbr.substring((ccNbr.length - 4));
+                stripeCcType = $.payment.cardType();
             }
 
             var stripeRequest = {
@@ -54,8 +57,6 @@
                 if (!ccNbrEl.parent().hasClass('form-group')) {
                     ccNbrEl.parent().addClass('form-group');
                 }
-            } else {
-
             }
 
             if (!$.payment.validateCardExpiry(expMonth, expYear)) {

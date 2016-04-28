@@ -10,7 +10,7 @@ use MobileCart\StripePaymentBundle\Form\StripeCreateTokenType;
 use MobileCart\StripePaymentBundle\Form\StripeTokenPaymentType;
 
 class StripePaymentService
-    implements PaymentMethodServiceInterface, TokenPaymentMethodServiceInterface
+    implements TokenPaymentMethodServiceInterface
 {
     protected $formFactory;
 
@@ -886,7 +886,7 @@ class StripePaymentService
             : '';
 
         $this->setTokenCreateRequest([
-            'source' => $token,
+            'token' => $token,
         ]);
 
         return $this;
@@ -917,6 +917,7 @@ class StripePaymentService
     {
         $gateway = new Gateway();
         $gateway->setApiKey($this->getPrivateKey());
+
         $captureResponse = $gateway->createCustomer($this->getTokenCreateRequest())->send();
         $this->setTokenCreateResponse($captureResponse);
 
@@ -1021,8 +1022,7 @@ class StripePaymentService
         $orderData = $this->getOrderData();
 
         $this->setTokenPaymentRequest([
-            'customer' => $this->getPaymentCustomerToken()->getServiceAccountId(),
-            'source' => $this->getPaymentCustomerToken()->getToken(),
+            'customerReference' => $this->getPaymentCustomerToken()->getServiceAccountId(),
             'currency' => $orderData['currency'],
             'amount' => $orderData['total'],
         ]);

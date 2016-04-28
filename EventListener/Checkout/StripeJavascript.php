@@ -3,6 +3,7 @@
 namespace MobileCart\StripePaymentBundle\EventListener\Checkout;
 
 use Symfony\Component\EventDispatcher\Event;
+use MobileCart\CoreBundle\Payment\PaymentMethodServiceInterface;
 
 class StripeJavascript
 {
@@ -61,15 +62,31 @@ class StripeJavascript
             $returnData['javascripts'] = [];
         }
 
-        // todo : figure out if customer already has a customer token
+        switch($this->getPaymentMethodService()->getAction()) {
+            case PaymentMethodServiceInterface::ACTION_PURCHASE_STORED_TOKEN:
 
-        $returnData['javascripts'][] = [
-            'js_template' => 'MobileCartStripePaymentBundle:Checkout:create_token_js.html.twig',
-            'data' => [
-                'code' => $this->getPaymentMethodService()->getCode(),
-                'public_key' => $this->getPaymentMethodService()->getPublicKey(),
-            ],
-        ];
+                $returnData['javascripts'][] = [
+                    'js_template' => 'MobileCartStripePaymentBundle:Checkout:token_payment_js.html.twig',
+                    'data' => [
+                        'code' => $this->getPaymentMethodService()->getCode(),
+                    ],
+                ];
+
+                break;
+            default:
+
+                $returnData['javascripts'][] = [
+                    'js_template' => 'MobileCartStripePaymentBundle:Checkout:create_token_js.html.twig',
+                    'data' => [
+                        'code' => $this->getPaymentMethodService()->getCode(),
+                        'public_key' => $this->getPaymentMethodService()->getPublicKey(),
+                    ],
+                ];
+
+                break;
+        }
+
+
 
         $event->setReturnData($returnData);
     }
