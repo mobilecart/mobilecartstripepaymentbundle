@@ -7,10 +7,6 @@
     <parameters>
         <parameter key="cart.payment.method.stripe.class">MobileCart\StripePaymentBundle\Service\StripePaymentService</parameter>
         <parameter key="cart.listener.payment.method.stripe.js.class">MobileCart\StripePaymentBundle\EventListener\Checkout\StripeJavascript</parameter>
-        <!-- todo : move parameters to app/config/config.yml -->
-        <parameter key="cart.payment.method.stripe.enabled">1</parameter>
-        <parameter key="cart.payment.method.stripe.testmode">1</parameter>
-        <parameter key="cart.payment.method.stripe.token.payment.enabled">1</parameter>
     </parameters>
 
     <services>

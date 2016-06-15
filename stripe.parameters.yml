@@ -1,4 +1,7 @@
 parameters:
+    cart.payment.method.stripe.enabled: 1
+    cart.payment.method.stripe.testmode: 1
+    cart.payment.method.stripe.token.payment.enabled: 1
     stripe.test.public: pk_test_asdf1234
     stripe.test.private: sk_test_asdf1234
     stripe.live.public: pk_live_asdf1234
