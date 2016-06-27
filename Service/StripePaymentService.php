@@ -1112,8 +1112,36 @@ class StripePaymentService
         return $this;
     }
 
+    /**
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
     public function buildSubscribeRecurringRequest()
     {
+        // @see https://stripe.com/docs/api#create_subscription
+        // @see https://stripe.com/docs/recipes/subscription-signup
+
+        if (!$this->getPaymentCustomerToken()) {
+            throw new \InvalidArgumentException("Invalid Token Payment Request");
+        }
+
+        $paymentData = $this->getPaymentData();
+        $orderData = $this->getOrderData();
+
+        $extPlanId = isset($paymentData['external_plan_id'])
+            ? $paymentData['external_plan_id']
+            : '';
+
+        if (!$extPlanId) {
+            throw new \InvalidArgumentException("Invalid Token Payment Request");
+        }
+
+        $this->setSubscribeRecurringRequest([
+            'customerReference' => $this->getPaymentCustomerToken()->getServiceAccountId(),
+            'plan' => $extPlanId,
+            'currency' => $orderData['currency'],
+            'amount' => $orderData['total'],
+        ]);
 
         return $this;
     }
@@ -1138,6 +1166,18 @@ class StripePaymentService
 
     public function sendSubscribeRecurringRequest()
     {
+        if (!$this->getSubscribeRecurringRequest()) {
+            throw new \InvalidArgumentException("Invalid Recurring Payment Request");
+        }
+
+        $gateway = new Gateway();
+        $gateway->setApiKey($this->getPrivateKey());
+        $paymentResponse = $gateway->createSubscription($this->getSubscribeRecurringRequest())->send();
+        $this->setSubscribeRecurringResponse($paymentResponse);
+
+        if ($this->subscribeRecurringResponse->isSuccessful()) {
+            $this->setIsPurchasedAndSubscribedRecurring(1);
+        }
 
         return $this;
     }
