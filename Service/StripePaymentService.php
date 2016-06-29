@@ -689,6 +689,7 @@ class StripePaymentService
 
         if ($purchaseResponse->isSuccessful()) {
             $this->setIsPurchased(1);
+            $this->setIsCaptured(1); // this is to satisfy OrderService when creating OrderPayment
         }
 
         return $this;
@@ -923,6 +924,7 @@ class StripePaymentService
 
         if ($captureResponse->isSuccessful()) {
             $this->setIsTokenCreated(1);
+            $this->setIsCaptured(1); // this is to satisfy OrderService when creating OrderPayment
         }
 
         return $this;
@@ -1065,6 +1067,7 @@ class StripePaymentService
 
         if ($this->tokenPaymentResponse->isSuccessful()) {
             $this->setIsPurchasedStoredToken(1);
+            $this->setIsCaptured(1); // this is to satisfy OrderService when creating OrderPayment
         }
 
         return $this;
@@ -1177,6 +1180,7 @@ class StripePaymentService
 
         if ($this->subscribeRecurringResponse->isSuccessful()) {
             $this->setIsPurchasedAndSubscribedRecurring(1);
+            $this->setIsCaptured(1); // this is to satisfy OrderService when creating OrderPayment
         }
 
         return $this;
