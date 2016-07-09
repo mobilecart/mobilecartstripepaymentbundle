@@ -97,6 +97,13 @@
                             stripePostData.cc_fingerprint = stripeCcFingerprint;
                             lastCcNbr = ccNbr;
                             checkout.updateSection(buttonEl, stripePostData);
+                        } else {
+                            if (!ccNbrEl.parent().hasClass('has-error')) {
+                                ccNbrEl.parent().addClass('has-error');
+                            }
+                            if (!ccNbrEl.parent().hasClass('form-group')) {
+                                ccNbrEl.parent().addClass('form-group');
+                            }
                         }
                     });
                 }
