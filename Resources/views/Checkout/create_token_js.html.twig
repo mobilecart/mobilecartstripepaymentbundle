@@ -13,7 +13,6 @@
     var stripeCcType = '';
     var stripeCcFingerprint = '';
     var lastCcNbr = '';
-    var email = '{{ email }}';
 
     checkout.paymentHandlers['{{ code }}'] = function(buttonEl) {
 
@@ -27,7 +26,6 @@
             var cvcEl = stripeContainer.find("input[data-stripe='cvc']");
             var expMonthEl = stripeContainer.find("select[data-stripe='exp-month']");
             var expYearEl = stripeContainer.find("select[data-stripe='exp-year']");
-            var emailEl = $('input#checkout_billing_address_email');
 
             ccNbrEl.parent().removeClass('has-error');
             cvcEl.parent().removeClass('has-error');
@@ -38,9 +36,6 @@
             var cvc = cvcEl.val();
             var expMonth = expMonthEl.val();
             var expYear = expYearEl.val();
-            if (email.length == 0 && emailEl.length > 0) {
-                email = emailEl.val();
-            }
 
             if (ccNbr.length > 10) {
                 stripeCcLastFour = ccNbr.substring((ccNbr.length - 4));
