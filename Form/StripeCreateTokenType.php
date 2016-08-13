@@ -26,7 +26,17 @@ class StripeCreateTokenType extends AbstractType
         ->add('payment_method', 'text')
         ->add('cc_type', 'text')
         ->add('cc_last_four', 'text')
-        ->add('cc_fingerprint', 'text');
+        ->add('cc_fingerprint', 'text')
+        ->add('email', 'text', [
+            'required' => 0,
+        ])
+        ->add('exp_year', 'text', [
+            'required' => 0
+        ])
+        ->add('exp_month', 'text', [
+            'required' => 0
+        ])
+        ;
     }
 
     /**

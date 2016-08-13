@@ -886,9 +886,19 @@ class StripePaymentService
             ? $paymentData['token']
             : '';
 
-        $this->setTokenCreateRequest([
+        $email = isset($paymentData['email'])
+            ? $paymentData['email']
+            : '';
+
+        $request = [
             'token' => $token,
-        ]);
+        ];
+
+        if ($email) {
+            $request['email'] = $email;
+        }
+
+        $this->setTokenCreateRequest($request);
 
         return $this;
     }
@@ -980,7 +990,14 @@ class StripePaymentService
             ? $paymentData['cc_fingerprint']
             : '';
 
-        $expireDate = ''; // todo
+        $expireDate = null;
+        if (isset($paymentData['exp_month']) && isset($paymentData['exp_year'])) {
+            $expMonth = (int) $paymentData['exp_month'];
+            $expYear = (int) $paymentData['exp_year'];
+            $expDay = '01';
+            $expireDateStr = "{$expYear}-{$expMonth}-{$expDay}";
+            $expireDate = new \DateTime($expireDateStr);
+        }
 
         $responseData = $createTokenResponse->getData();
         $accountId = $responseData['id'];
@@ -992,7 +1009,7 @@ class StripePaymentService
             'cc_type' => $ccType,
             'cc_last_four' => $ccLastFour,
             'cc_fingerprint' => $ccFingerprint,
-            //'expires_at' => $expireDate,
+            'expires_at' => $expireDate,
         ];
     }
 
