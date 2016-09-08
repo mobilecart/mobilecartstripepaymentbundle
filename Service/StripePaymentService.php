@@ -46,6 +46,8 @@ class StripePaymentService
      */
     protected $paymentCustomerToken;
 
+    protected $subscriptionCustomer;
+
     protected $paymentData = [];
 
     protected $orderData = [];
@@ -63,6 +65,8 @@ class StripePaymentService
     protected $isPurchasedStoredToken = false;
 
     protected $isPurchasedAndSubscribedRecurring = false;
+
+    protected $isCanceledRecurring = false;
 
     protected $purchaseRequest;
 
@@ -87,6 +91,10 @@ class StripePaymentService
     protected $subscribeRecurringRequest;
 
     protected $subscribeRecurringResponse;
+
+    protected $cancelRecurringRequest;
+
+    protected $cancelRecurringResponse;
 
     protected $confirmation = '';
 
@@ -176,6 +184,29 @@ class StripePaymentService
         return $this->paymentCustomerToken;
     }
 
+    /**
+     * @param $subCustomer
+     * @return $this|mixed
+     */
+    public function setSubscriptionCustomer($subCustomer)
+    {
+        $this->subscriptionCustomer = $subCustomer;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSubscriptionCustomer()
+    {
+        return $this->subscriptionCustomer;
+    }
+
+    /**
+     * @param $action
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
     public function setDefaultAction($action)
     {
         if (!$this->supportsAction($action)) {
@@ -1184,6 +1215,10 @@ class StripePaymentService
         return $this->subscribeRecurringRequest;
     }
 
+    /**
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
     public function sendSubscribeRecurringRequest()
     {
         if (!$this->getSubscribeRecurringRequest()) {
@@ -1237,5 +1272,106 @@ class StripePaymentService
     public function getIsPurchasedAndSubscribedRecurring()
     {
         return $this->isPurchasedAndSubscribedRecurring;
+    }
+
+    /**
+     * Cancel Subscription
+     *
+     * @return mixed|void
+     */
+    public function cancelRecurring()
+    {
+        $this->buildCancelRecurringRequest()
+            ->sendCancelRecurringRequest();
+    }
+
+    public function buildCancelRecurringRequest()
+    {
+        if (!$this->getSubscriptionCustomer() || !$this->getSubscriptionCustomer()->getCustomerToken()) {
+            throw new \InvalidArgumentException("Cannot cancel without a SubscriptionCustomer and CustomerToken object");
+        }
+
+        $cusToken = $this->getSubscriptionCustomer()->getCustomerToken()->getServiceAccountId();
+        $subToken = '';
+        $customerData = [
+            'customerReference' => $cusToken,
+        ];
+
+        $gateway = new Gateway();
+        $gateway->setApiKey($this->getPrivateKey());
+        $customerResponse = $gateway->fetchCustomer($customerData)->send();
+        $customerResponseData = $customerResponse->getData();
+
+        if (isset($customerResponseData['subscriptions']['data'])) {
+            $subscriptions = $customerResponseData['subscriptions']['data'];
+            if ($subscriptions) {
+                $subToken = $subscriptions[0]['id'];
+            }
+        }
+
+        if ($subToken) {
+            $subData = [
+                'customerReference' => $cusToken,
+                'subscriptionReference' => $subToken,
+            ];
+            $this->setCancelRecurringRequest($subData);
+        }
+        return $this;
+    }
+
+    public function setCancelRecurringRequest($cancelRecurringRequest)
+    {
+        $this->cancelRecurringRequest = $cancelRecurringRequest;
+        return $this;
+    }
+
+    public function getCancelRecurringRequest()
+    {
+        return $this->cancelRecurringRequest;
+    }
+
+    public function sendCancelRecurringRequest()
+    {
+        if (!$this->getCancelRecurringRequest()) {
+            throw new \InvalidArgumentException("Cannot cancel recurring without building request first.");
+        }
+
+        $gateway = new Gateway();
+        $gateway->setApiKey($this->getPrivateKey());
+        $subData = $this->getCancelRecurringRequest();
+
+        $cancelRequest = $gateway->cancelSubscription($subData);
+        $cancelData = $cancelRequest->getData();
+        $cancelData['at_period_end'] = 'true';
+
+        $cancelResponse = $cancelRequest->sendData($cancelData);
+        $this->setCancelRecurringResponse($cancelResponse);
+        if ($cancelResponse->isSuccessful()) {
+            $this->setIsCanceledRecurring(1);
+        }
+
+        return $this;
+    }
+
+    public function setCancelRecurringResponse($cancelRecurringResponse)
+    {
+        $this->cancelRecurringResponse;
+        return $this;
+    }
+
+    public function getCancelRecurringResponse()
+    {
+        return $this->cancelRecurringResponse;
+    }
+
+    public function setIsCanceledRecurring($isCanceled)
+    {
+        $this->isCanceledRecurring = $isCanceled;
+        return $this;
+    }
+
+    public function getIsCanceledRecurring()
+    {
+        return $this->isCanceledRecurring;
     }
 }
