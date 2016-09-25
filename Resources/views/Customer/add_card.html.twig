@@ -1,0 +1,52 @@
+{% extends frontend() %}
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Add Credit Card</h2>
+                </div>
+                <div id="payment-stripe" class="panel-body">
+                    {{ form_widget(form) }}
+                    <div class="form-group">
+                        <label class="control-label">Replace Current Card</label>
+                        <br>
+                        <input type="checkbox" class="" name="replace_card" value="1" checked="checked" />
+                    </div>
+                    <div class="form-actions text-center">
+                        <button class="btn btn-success stripe-submit">Save Card</button>
+                        <div class="text-center spinner" style="display:none;">
+                            <i class="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript" src="{{ asset('bundles/mobilecartstripepayment/js/jquery.payment.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/mobilecartstripepayment/js/card-widget.js') }}"></script>
+    <script type="text/javascript">
+        Stripe.setPublishableKey('{{ public_key }}');
+    </script>
+
+    <script type="text/javascript">
+        $(function(){
+            var widget = new CardWidget({
+                code: "{{ code }}",
+                postUrl: "{{ path('cart_customer_add_card_post', {'format':'json'}) }}",
+                buttonEl: $('button.stripe-submit'),
+                stripeContainer: $('div#payment-stripe')
+            });
+        });
+    </script>
+
+{% endblock %}

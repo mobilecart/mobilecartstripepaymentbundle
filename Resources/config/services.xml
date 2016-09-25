@@ -7,6 +7,8 @@
     <parameters>
         <parameter key="cart.payment.method.stripe.class">MobileCart\StripePaymentBundle\Service\StripePaymentService</parameter>
         <parameter key="cart.listener.payment.method.stripe.js.class">MobileCart\StripePaymentBundle\EventListener\Checkout\StripeJavascript</parameter>
+        <parameter key="cart.listener.customer.add_card.view.return.class">MobileCart\StripePaymentBundle\EventListener\Customer\CustomerAddCardViewReturn</parameter>
+        <parameter key="cart.listener.customer.add_card.class">MobileCart\StripePaymentBundle\EventListener\Customer\CustomerAddCard</parameter>
     </parameters>
 
     <services>
@@ -57,6 +59,31 @@
         <service id="cart.listener.payment.method.stripe.js" lazy="true" class="%cart.listener.payment.method.stripe.js.class%">
             <tag name="kernel.event_listener" event="checkout.view.return" method="onCheckoutViewReturn" priority="60" />
             <call method="setPaymentMethodService">
+                <argument type="service" id="cart.payment.method.stripe" />
+            </call>
+        </service>
+
+        <!-- Event Listener: Render Form for Adding/Replacing Card -->
+        <service id="cart.listener.customer.add_card.view.return" lazy="true" class="%cart.listener.customer.add_card.view.return.class%">
+            <tag name="kernel.event_listener" event="customer.add_card.view.return" method="onCustomerAddCardViewReturn" priority="50" />
+            <call method="setEntityService">
+                <argument type="service" id="cart.entity" />
+            </call>
+            <call method="setThemeService">
+                <argument type="service" id="cart.theme" />
+            </call>
+            <call method="setStripePaymentMethodService">
+                <argument type="service" id="cart.payment.method.stripe" />
+            </call>
+        </service>
+
+        <!-- Event Listener: Handle Adding/Replacing Card -->
+        <service id="cart.listener.customer.add_card" lazy="true" class="%cart.listener.customer.add_card.class%">
+            <tag name="kernel.event_listener" event="customer.add_card" method="onCustomerAddCard" priority="50" />
+            <call method="setEntityService">
+                <argument type="service" id="cart.entity" />
+            </call>
+            <call method="setStripePaymentMethodService">
                 <argument type="service" id="cart.payment.method.stripe" />
             </call>
         </service>

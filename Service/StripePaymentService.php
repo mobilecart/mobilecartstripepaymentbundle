@@ -68,6 +68,10 @@ class StripePaymentService
 
     protected $isCanceledRecurring = false;
 
+    protected $isCardCreated = false;
+
+    protected $isCustomerUpdated = false;
+
     protected $purchaseRequest;
 
     protected $purchaseResponse;
@@ -95,6 +99,12 @@ class StripePaymentService
     protected $cancelRecurringRequest;
 
     protected $cancelRecurringResponse;
+
+    protected $createCardRequest;
+
+    protected $createCardResponse;
+
+    protected $updateCustomerResponse;
 
     protected $confirmation = '';
 
@@ -926,7 +936,7 @@ class StripePaymentService
         ];
 
         if ($email) {
-            $request['email'] = $email;
+            //$request['email'] = $email;
         }
 
         $this->setTokenCreateRequest($request);
@@ -1373,5 +1383,131 @@ class StripePaymentService
     public function getIsCanceledRecurring()
     {
         return $this->isCanceledRecurring;
+    }
+
+    /**
+     * Add Card to Customer
+     *
+     * @return $this
+     */
+    public function createCard()
+    {
+        $this->buildCreateCardRequest()
+            ->sendCreateCardRequest();
+
+        return $this;
+    }
+
+    public function buildCreateCardRequest()
+    {
+        $cusToken = $this->getPaymentCustomerToken()->getServiceAccountId();
+        $token = $this->getPaymentCustomerToken()->getToken();
+
+        $this->setCreateCardRequest([
+            'customerReference' => $cusToken,
+            'cardReference' => $token,
+        ]);
+
+        return $this;
+    }
+
+    public function setCreateCardRequest($createCardRequest)
+    {
+        $this->createCardRequest = $createCardRequest;
+        return $this;
+    }
+
+    public function getCreateCardRequest()
+    {
+        return $this->createCardRequest;
+    }
+
+    public function sendCreateCardRequest()
+    {
+        if (!$this->getCreateCardRequest()) {
+            throw new \InvalidArgumentException("Cannot add card without building request first.");
+        }
+
+        $gateway = new Gateway();
+        $gateway->setApiKey($this->getPrivateKey());
+        $addCardData = $this->getCreateCardRequest();
+        $createCardRequest = $gateway->createCard($addCardData);
+        $addCardData = $createCardRequest->getData();
+        // add more data ?
+
+        $createCardResponse = $createCardRequest->sendData($addCardData);
+        $this->setCreateCardResponse($createCardResponse);
+        if ($createCardResponse->isSuccessful()) {
+            $this->setIsCardCreated(1);
+        }
+
+        return $this;
+    }
+
+    public function setCreateCardResponse($createCardResponse)
+    {
+        $this->createCardResponse = $createCardResponse;
+        return $this;
+    }
+
+    public function getCreateCardResponse()
+    {
+        return $this->createCardResponse;
+    }
+
+    public function setIsCardCreated($isCardCreated)
+    {
+        $this->isCardCreated = $isCardCreated;
+        return $this;
+    }
+
+    public function getIsCardCreated()
+    {
+        return $this->isCardCreated;
+    }
+
+    /**
+     * Update Customer
+     *
+     * @param $params
+     * @return $this
+     */
+    public function updateCustomer($params)
+    {
+        $gateway = new Gateway();
+        $gateway->setApiKey($this->getPrivateKey());
+        $updateCustomerRequest = $gateway->updateCustomer($params);
+        if (isset($params['customerReference'])) {
+            unset($params['customerReference']);
+        }
+        $updateCustomerResponse = $updateCustomerRequest->sendData($params);
+        $this->setUpdateCustomerResponse($updateCustomerResponse);
+        if ($updateCustomerResponse->isSuccessful()) {
+            $this->setIsCustomerUpdated(1);
+        }
+
+        return $this;
+    }
+
+    public function setUpdateCustomerResponse($updateCustomerResponse)
+    {
+        $this->updateCustomerResponse = $updateCustomerResponse;
+        return $this;
+    }
+
+    public function getUpdateCustomerResponse()
+    {
+        return $this->updateCustomerResponse;
+    }
+
+    public function setIsCustomerUpdated($isCustomerUpdated)
+    {
+        $this->isCustomerUpdated = $isCustomerUpdated;
+        return $this;
+    }
+
+    public function getIsCustomerUpdated()
+    {
+        return $this->isCustomerUpdated;
     }
 }

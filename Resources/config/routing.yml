@@ -1,0 +1,9 @@
+cart_customer_add_card_view_return:
+    path:      /customer/stripe/card/add
+    defaults:  { _controller: MobileCartStripePaymentBundle:Frontend/Customer:addCard }
+    methods:  [GET]
+
+cart_customer_add_card_post:
+    path:      /customer/stripe/card/add
+    defaults:  { _controller: MobileCartStripePaymentBundle:Frontend/Customer:addCardPost }
+    methods:  [POST]
