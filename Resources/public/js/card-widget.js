@@ -170,6 +170,10 @@ CardWidget.prototype = {
                         }
                     });
                 }
+            } else {
+
+                widget.buttonEl.show();
+                widget.buttonEl.siblings('.spinner').hide();
             }
         } catch(e) {
 
