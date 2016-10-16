@@ -959,7 +959,7 @@ class StripePaymentService
      */
     public function sendTokenCreateRequest()
     {
-        $paymentData = $this->getPaymentData();
+        $orderData = $this->getOrderData();
 
         $gateway = new Gateway();
         $gateway->setApiKey($this->getPrivateKey());
@@ -967,8 +967,8 @@ class StripePaymentService
         $captureRequest = $gateway->createCustomer($this->getTokenCreateRequest());
         $data = $captureRequest->getData();
 
-        $email = isset($paymentData['email'])
-            ? $paymentData['email']
+        $email = isset($orderData['email'])
+            ? $orderData['email']
             : '';
 
         if ($email) {
