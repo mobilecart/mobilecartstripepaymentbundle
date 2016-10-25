@@ -13,6 +13,7 @@
     var stripeCcType = '';
     var stripeCcFingerprint = '';
     var lastCcNbr = '';
+    var lastCvv = '';
 
     checkout.paymentHandlers['{{ code }}'] = function(buttonEl) {
 
@@ -85,7 +86,7 @@
 
             if (isValid) {
                 // use the token we already generated
-                if (stripeToken.length > 3 && ccNbr == lastCcNbr) {
+                if (stripeToken.length > 3 && ccNbr == lastCcNbr && cvc == lastCvv) {
                     checkout.updateSection(buttonEl, stripePostData);
                 } else {
                     Stripe.card.createToken(stripeRequest, function(status, response) {
@@ -98,6 +99,7 @@
                             stripePostData.exp_month = expMonth;
                             stripePostData.exp_year = expYear;
                             lastCcNbr = ccNbr;
+                            lastCvv = cvc;
                             checkout.updateSection(buttonEl, stripePostData);
                         } else {
                             if (!ccNbrEl.parent().hasClass('has-error')) {
