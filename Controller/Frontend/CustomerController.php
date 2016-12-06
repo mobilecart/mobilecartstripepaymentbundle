@@ -64,7 +64,7 @@ class CustomerController extends Controller
             ->dispatch(StripeEvents::CUSTOMER_ADD_CARD, $event);
 
         // handle response : json, html
-        switch($request->get('format', '')) {
+        switch($request->get(\MobileCart\CoreBundle\Constants\ApiConstants::PARAM_RESPONSE_TYPE, '')) {
             case 'json':
                 return new JsonResponse([
                     'success' => (int) $event->getSuccess(),
