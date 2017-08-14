@@ -9,6 +9,18 @@
         <parameter key="cart.listener.payment.method.stripe.js.class">MobileCart\StripePaymentBundle\EventListener\Checkout\StripeJavascript</parameter>
         <parameter key="cart.listener.customer.add_card.view.return.class">MobileCart\StripePaymentBundle\EventListener\Customer\CustomerAddCardViewReturn</parameter>
         <parameter key="cart.listener.customer.add_card.class">MobileCart\StripePaymentBundle\EventListener\Customer\CustomerAddCard</parameter>
+
+        <!-- howto: enable your bundle in AppKernel.php _after_ this bundle , and copy/paste/change these parameters -->
+        <parameter key="cart.payment.method.stripe.enabled">1</parameter>
+        <parameter key="cart.payment.method.stripe.testmode">1</parameter>
+        <!-- test credentials -->
+        <parameter key="stripe.test.public"> </parameter>
+        <parameter key="stripe.test.private"> </parameter>
+        <!-- live credentials -->
+        <parameter key="stripe.live.public"> </parameter>
+        <parameter key="stripe.live.private"> </parameter>
+        <parameter key="cart.payment.method.stripe.token.payment.enabled">1</parameter>
+        <parameter key="cart.payment.method.stripe.action.default">create_token</parameter>
     </parameters>
 
     <services>
@@ -34,7 +46,7 @@
                 <argument type="string">%stripe.live.private%</argument>
             </call>
             <call method="setDefaultAction">
-                <argument type="string">create_token</argument>
+                <argument type="string">%cart.payment.method.stripe.action.default%</argument>
             </call>
         </service>
 
