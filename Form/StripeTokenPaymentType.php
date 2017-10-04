@@ -76,11 +76,12 @@ class StripeTokenPaymentType extends AbstractType
     {
         $builder->add('token', ChoiceType::class, [
             'label' => 'Saved Card',
-            'choices' => $this->getTokenOptions(),
+            'choices' => array_flip($this->getTokenOptions()),
             'required' => true,
             'constraints' => [
                 new NotBlank(),
             ],
+            'choices_as_values' => true,
         ]);
     }
 

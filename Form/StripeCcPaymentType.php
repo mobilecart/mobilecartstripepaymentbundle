@@ -57,26 +57,28 @@ class StripeCcPaymentType extends AbstractType
             ->add('expiryMonth', ChoiceType::class, [
                 'label' => 'Expiration Month',
                 'required' => true,
-                'choices' => $months,
+                'choices' => array_flip($months),
                 'constraints' => [
                     new NotBlank(),
                 ],
                 'attr' => [
                     'class' => 'form-control',
                     'data-stripe' => 'exp-month',
-                ]
+                ],
+                'choices_as_values' => true,
             ])
             ->add('expiryYear', ChoiceType::class, [
                 'label' => 'Expiration Year',
                 'required' => true,
-                'choices' => $years,
+                'choices' => array_flip($years),
                 'constraints' => [
                     new NotBlank(),
                 ],
                 'attr' => [
                     'class' => 'form-control',
                     'data-stripe' => 'exp-year',
-                ]
+                ],
+                'choices_as_values' => true,
             ])
             ->add('cvv', TextType::class, [
                 'label' => 'CVV',
