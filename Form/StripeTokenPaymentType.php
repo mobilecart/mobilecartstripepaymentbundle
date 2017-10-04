@@ -4,23 +4,69 @@ namespace MobileCart\StripePaymentBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use MobileCart\CoreBundle\Constants\EntityConstants;
 
+/**
+ * Class StripeTokenPaymentType
+ * @package MobileCart\StripePaymentBundle\Form
+ */
 class StripeTokenPaymentType extends AbstractType
 {
-    protected $tokenOptions = [];
+    /**
+     * @var \MobileCart\CoreBundle\Service\CartSessionService
+     */
+    protected $cartSessionService;
 
-    public function setTokenOptions(array $tokenOptions)
+    /**
+     * @param \MobileCart\CoreBundle\Service\CartSessionService $cartSessionService
+     * @return $this
+     */
+    public function setCartSessionService(\MobileCart\CoreBundle\Service\CartSessionService $cartSessionService)
     {
-        $this->tokenOptions = $tokenOptions;
+        $this->cartSessionService = $cartSessionService;
+        return $this;
     }
 
+    /**
+     * @return \MobileCart\CoreBundle\Service\CartSessionService
+     */
+    public function getCartSessionService()
+    {
+        return $this->cartSessionService;
+    }
+
+    /**
+     * @return \MobileCart\CoreBundle\Service\AbstractEntityService
+     */
+    public function getEntityService()
+    {
+        return $this->getCartSessionService()->getDiscountService()->getEntityService();
+    }
+
+    /**
+     * @return array
+     */
     public function getTokenOptions()
     {
-        return $this->tokenOptions;
-    }
+        $options = [];
+        $customerId = $this->getCartSessionService()->getCustomerId();
+        if ($customerId) {
 
+            $customerTokens = $this->getEntityService()->findBy(EntityConstants::CUSTOMER_TOKEN, [
+                'customer' => $customerId,
+            ]);
+
+            if ($customerTokens) {
+                foreach($customerTokens as $token) {
+                    $options[$token->getToken()] = "{$token->getCcType()} : xxxx-{$token->getCcLastFour()}";
+                }
+            }
+        }
+        return $options;
+    }
 
     /**
      * @param FormBuilderInterface $builder
@@ -28,10 +74,10 @@ class StripeTokenPaymentType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('token', 'choice', [
+        $builder->add('token', ChoiceType::class, [
             'label' => 'Saved Card',
             'choices' => $this->getTokenOptions(),
-            'required' => 1,
+            'required' => true,
             'constraints' => [
                 new NotBlank(),
             ],
@@ -41,7 +87,7 @@ class StripeTokenPaymentType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'stripe';
     }

@@ -3,11 +3,7 @@
 namespace MobileCart\StripePaymentBundle\Service;
 
 use Omnipay\Stripe\Gateway; // composer package : omnipay/stripe
-use MobileCart\CoreBundle\Payment\PaymentMethodServiceInterface;
 use MobileCart\CoreBundle\Payment\TokenPaymentMethodServiceInterface;
-use MobileCart\StripePaymentBundle\Form\StripeCcPaymentType;
-use MobileCart\StripePaymentBundle\Form\StripeCreateTokenType;
-use MobileCart\StripePaymentBundle\Form\StripeTokenPaymentType;
 
 class StripePaymentService
     implements TokenPaymentMethodServiceInterface
@@ -303,29 +299,17 @@ class StripePaymentService
 
                 //*/
 
-                $formType = $this->getIsSubmission()
-                    ? new StripeCreateTokenType()
-                    : new StripeCcPaymentType();
+                $formTypeClass = $this->getIsSubmission()
+                    ? 'MobileCart\StripePaymentBundle\Form\StripeCreateTokenType'
+                    : 'MobileCart\StripePaymentBundle\Form\StripeCcPaymentType';
 
-                $form = $this->getFormFactory()->create($formType);
-                $this->setForm($form);
+                $this->setForm($this->getFormFactory()->create($formTypeClass));
 
                 break;
             case self::ACTION_PURCHASE_STORED_TOKEN:
 
-                $formType = new StripeTokenPaymentType();
-                //  set possible values to token input
-                $choices = [];
-                foreach($this->getCustomerTokens() as $token) {
-                    //  set labels as : "Visa : xxxx-0123"
-                    $label = "{$token->getCcType()} : xxxx-{$token->getCcLastFour()}";
-                    $choices[$token->getToken()] = $label;
-                }
-
-                $formType->setTokenOptions($choices);
-
-                $form = $this->getFormFactory()->create($formType);
-                $this->setForm($form);
+                $formTypeClass = 'MobileCart\StripePaymentBundle\Form\StripeTokenPaymentType';
+                $this->setForm($this->getFormFactory()->create($formTypeClass));
 
                 break;
             default:

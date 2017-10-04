@@ -1,7 +1,7 @@
-
 <script type="text/javascript">
+$(function() {
 
-    checkout.paymentHandlers['{{ code }}'] = function(buttonEl) {
+    paymentWidget.addPostDataGetter("{{ code }}", function(){
         var code = "{{ code }}";
 
         var tokenEl = $('#payment-' + code).find('select[name="' + code + '[token]"]');
@@ -11,6 +11,6 @@
             payment_method: code,
             token: tokenVal
         };
-    }
-
+    });
+});
 </script>

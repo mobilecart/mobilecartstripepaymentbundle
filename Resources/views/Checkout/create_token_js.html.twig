@@ -1,7 +1,7 @@
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 <script type="text/javascript" src="{{ asset('bundles/mobilecartstripepayment/js/jquery.payment.min.js') }}"></script>
 <script type="text/javascript">
-
+$(function() {
     // This identifies your website in the createToken call below
     Stripe.setPublishableKey('{{ public_key }}');
 
@@ -15,7 +15,7 @@
     var lastCcNbr = '';
     var lastCvv = '';
 
-    checkout.paymentHandlers['{{ code }}'] = function(buttonEl) {
+    paymentWidget.addPostDataGetter("{{ code }}", function(){
 
         var code = "{{ code }}";
         stripePostData['payment_method'] = code;
@@ -87,7 +87,10 @@
             if (isValid) {
                 // use the token we already generated
                 if (stripeToken.length > 3 && ccNbr == lastCcNbr && cvc == lastCvv) {
-                    checkout.updateSection(buttonEl, stripePostData);
+
+                    paymentWidget.setPostData(stripePostData);
+                    paymentWidget.setPaymentMethod(code);
+                    paymentWidget.submitPayment();
                 } else {
                     Stripe.card.createToken(stripeRequest, function(status, response) {
                         if (typeof response.id != 'undefined') {
@@ -100,7 +103,11 @@
                             stripePostData.exp_year = expYear;
                             lastCcNbr = ccNbr;
                             lastCvv = cvc;
-                            checkout.updateSection(buttonEl, stripePostData);
+
+                            paymentWidget.setPostData(stripePostData);
+                            paymentWidget.setPaymentMethod(code);
+                            paymentWidget.submitPayment();
+
                         } else {
                             if (!ccNbrEl.parent().hasClass('has-error')) {
                                 ccNbrEl.parent().addClass('has-error');
@@ -113,19 +120,18 @@
                 }
             } else {
 
-                buttonEl.show();
-                buttonEl.siblings('.spinner').hide();
+                paymentWidget.buttonEl.show();
+                paymentWidget.buttonEl.siblings('.spinner').hide();
             }
-
         } catch(e) {
 
-            buttonEl.show();
-            buttonEl.siblings('.spinner').hide();
+            paymentWidget.buttonEl.show();
+            paymentWidget.buttonEl.siblings('.spinner').hide();
         }
 
         return {
             callback: true
         };
-    };
-
+    });
+});
 </script>

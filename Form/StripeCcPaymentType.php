@@ -4,9 +4,15 @@ namespace MobileCart\StripePaymentBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
+/**
+ * Class StripeCcPaymentType
+ * @package MobileCart\StripePaymentBundle\Form
+ */
 class StripeCcPaymentType extends AbstractType
 {
     /**
@@ -37,9 +43,9 @@ class StripeCcPaymentType extends AbstractType
             $years[$year] = $year;
         }
 
-        $builder->add('number', 'text', [
+        $builder->add('number', TextType::class, [
                 'label' => 'Credit Card Number',
-                'required' => 1,
+                'required' => true,
                 'constraints' => [
                     new NotBlank(),
                 ],
@@ -48,9 +54,9 @@ class StripeCcPaymentType extends AbstractType
                     'data-stripe' => 'number'
                 ]
             ])
-            ->add('expiryMonth', 'choice', [
+            ->add('expiryMonth', ChoiceType::class, [
                 'label' => 'Expiration Month',
-                'required' => 1,
+                'required' => true,
                 'choices' => $months,
                 'constraints' => [
                     new NotBlank(),
@@ -60,9 +66,9 @@ class StripeCcPaymentType extends AbstractType
                     'data-stripe' => 'exp-month',
                 ]
             ])
-            ->add('expiryYear', 'choice', [
+            ->add('expiryYear', ChoiceType::class, [
                 'label' => 'Expiration Year',
-                'required' => 1,
+                'required' => true,
                 'choices' => $years,
                 'constraints' => [
                     new NotBlank(),
@@ -72,9 +78,9 @@ class StripeCcPaymentType extends AbstractType
                     'data-stripe' => 'exp-year',
                 ]
             ])
-            ->add('cvv', 'text', [
+            ->add('cvv', TextType::class, [
                 'label' => 'CVV',
-                'required' => 1,
+                'required' => true,
                 'constraints' => [
                     new NotBlank(),
                 ],
@@ -89,7 +95,7 @@ class StripeCcPaymentType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'stripe';
     }
