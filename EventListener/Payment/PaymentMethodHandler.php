@@ -24,9 +24,9 @@ class PaymentMethodHandler
     protected $entityService;
 
     /**
-     * @var \MobileCart\CoreBundle\Service\CartSessionService
+     * @var \MobileCart\CoreBundle\Service\CartService
      */
-    protected $cartSessionService;
+    protected $cartService;
 
     /**
      * @var bool
@@ -70,21 +70,21 @@ class PaymentMethodHandler
     }
 
     /**
-     * @param $cartSessionService
+     * @param $cartService
      * @return $this
      */
-    public function setCartSessionService($cartSessionService)
+    public function setCartService($cartService)
     {
-        $this->cartSessionService = $cartSessionService;
+        $this->cartService = $cartService;
         return $this;
     }
 
     /**
-     * @return \MobileCart\CoreBundle\Service\CartSessionService
+     * @return \MobileCart\CoreBundle\Service\CartService
      */
-    public function getCartSessionService()
+    public function getCartService()
     {
-        return $this->cartSessionService;
+        return $this->cartService;
     }
 
     /**
@@ -123,7 +123,7 @@ class PaymentMethodHandler
         $javascripts = [];
 
         $customerTokens = $this->getEntityService()->findBy(EntityConstants::CUSTOMER_TOKEN, [
-            'customer' => $this->getCartSessionService()->getCustomerId(),
+            'customer' => $this->getCartService()->getCustomerId(),
             'service' => $paymentMethodService->getCode(),
         ]);
 

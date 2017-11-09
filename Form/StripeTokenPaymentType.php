@@ -16,26 +16,26 @@ use MobileCart\CoreBundle\Constants\EntityConstants;
 class StripeTokenPaymentType extends AbstractType
 {
     /**
-     * @var \MobileCart\CoreBundle\Service\CartSessionService
+     * @var \MobileCart\CoreBundle\Service\CartService
      */
-    protected $cartSessionService;
+    protected $cartService;
 
     /**
-     * @param \MobileCart\CoreBundle\Service\CartSessionService $cartSessionService
+     * @param \MobileCart\CoreBundle\Service\CartService $cartService
      * @return $this
      */
-    public function setCartSessionService(\MobileCart\CoreBundle\Service\CartSessionService $cartSessionService)
+    public function setCartService(\MobileCart\CoreBundle\Service\CartService $cartService)
     {
-        $this->cartSessionService = $cartSessionService;
+        $this->cartService = $cartService;
         return $this;
     }
 
     /**
-     * @return \MobileCart\CoreBundle\Service\CartSessionService
+     * @return \MobileCart\CoreBundle\Service\CartService
      */
-    public function getCartSessionService()
+    public function getCartService()
     {
-        return $this->cartSessionService;
+        return $this->cartService;
     }
 
     /**
@@ -43,7 +43,7 @@ class StripeTokenPaymentType extends AbstractType
      */
     public function getEntityService()
     {
-        return $this->getCartSessionService()->getDiscountService()->getEntityService();
+        return $this->getCartService()->getDiscountService()->getEntityService();
     }
 
     /**
@@ -52,7 +52,7 @@ class StripeTokenPaymentType extends AbstractType
     public function getTokenOptions()
     {
         $options = [];
-        $customerId = $this->getCartSessionService()->getCustomerId();
+        $customerId = $this->getCartService()->getCustomerId();
         if ($customerId) {
 
             $customerTokens = $this->getEntityService()->findBy(EntityConstants::CUSTOMER_TOKEN, [
